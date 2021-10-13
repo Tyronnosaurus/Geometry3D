@@ -55,15 +55,7 @@ def get_triangle_area(pa,pb,pc):
     return math.sqrt(p * (p - a) * (p - b) * (p - c))
 
 class ConvexPolygon(GeoBody):
-    """
-    - ConvexPolygons(points)
-    points: a tuple of points.
 
-    The points needn't to be in order.
-
-    The convexity should be guaranteed. This function **will not** check the convexity.
-    If the Polygon is not convex, there might be errors.
-    """
     class_level = 4 # the class level of ConvexPolygon
 
     @classmethod
@@ -117,7 +109,17 @@ class ConvexPolygon(GeoBody):
         else:
             raise TypeError("Parallelogram should be initialized with Point, Vector and Vector, but the given types are %s, %s and %s" %(type(base_point),type(v1),type(v2)))
     
+
     def __init__(self,pts,reverse = False, check_convex=False):
+        """
+        - ConvexPolygons(points)
+        points: a tuple of points.
+
+        The points needn't be in order. They'll get automatically reordered to form the convex polygon.
+
+        The convexity should be guaranteed. This function **will not** check the convexity.
+        If the Polygon is not convex, there might be errors.
+        """
         # merge same points
         points = copy.deepcopy(pts)
         self.points = sorted(set(points),key=points.index)
@@ -131,6 +133,7 @@ class ConvexPolygon(GeoBody):
         self.center_point = self._get_center_point()
 
         self._check_and_sort_points()
+
 
     def segments(self):
         """
