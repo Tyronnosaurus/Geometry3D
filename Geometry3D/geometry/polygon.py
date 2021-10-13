@@ -12,6 +12,85 @@ from ..utils.vector import x_unit_vector,y_unit_vector
 import copy
 import math
 
+
+
+class Polygon(GeoBody):
+    '''
+    Should not be instanced.
+    Parent class to ConvexPolygon and ConcavePolygon.
+    '''
+
+    class_level = 4 # the class level of Polygon
+
+    def __init__(self):
+        raise NotImplementedError("Do not use Polygon class. Use ConvexPolygon or ConcavePolygon instead.")
+
+
+    def _get_center_point(self):
+        """
+        **Input:**
+        
+        - points: tuple of points
+
+        **Output:**
+
+        - The center point of given points
+        """
+        x,y,z =(0,0,0)
+        num_points = len(self.points)
+        for point in self.points:
+            x += point.x
+            y += point.y
+            z += point.z
+        return Point(float(x) / num_points,float(y) / num_points,float(z) / num_points)
+
+
+    def segments(self):
+        """
+        **Input:**
+        
+        - self
+
+        **Output:**
+
+        - iterator of segments
+        """
+        for i in range(len(self.points)):
+            index_0 = i
+            if i == len(self.points) - 1:
+                index_1 = 0
+            else:
+                index_1 = i + 1
+            yield Segment(self.points[index_0],self.points[index_1])
+
+
+    def length(self):
+        """return the total length of ConvexPolygon""" 
+        length = 0
+        for segment in self.segments():
+            length += segment.length()
+        return length
+
+    def in_(self,other):
+        """
+        **Input:**
+        
+        - self: ConvexPolygon
+        
+        - other: Plane
+
+        **Output:**
+
+        - whether self in other
+        """
+        if isinstance(other,Plane):
+            return self.plane == other
+        else:
+            raise NotImplementedError("")
+
+
+
+
 def get_circle_point_list(center,normal,radius,n=10):
     if n <= 2:
         raise ValueError("n must be at least 3 to construct an inscribed polygon for a circle")
@@ -54,9 +133,8 @@ def get_triangle_area(pa,pb,pc):
     p = (a + b + c) / 2
     return math.sqrt(p * (p - a) * (p - b) * (p - c))
 
-class ConvexPolygon(GeoBody):
 
-    class_level = 4 # the class level of ConvexPolygon
+class ConvexPolygon(Polygon):
 
     @classmethod
     def Circle(cls,center,normal,radius,n=10):
@@ -133,43 +211,7 @@ class ConvexPolygon(GeoBody):
         self.center_point = self._get_center_point()
 
         self._check_and_sort_points()
-
-
-    def segments(self):
-        """
-        **Input:**
         
-        - self
-
-        **Output:**
-
-        - iterator of segments
-        """
-        for i in range(len(self.points)):
-            index_0 = i
-            if i == len(self.points) - 1:
-                index_1 = 0
-            else:
-                index_1 = i + 1
-            yield Segment(self.points[index_0],self.points[index_1])
-    
-    def _get_center_point(self):
-        """
-        **Input:**
-        
-        - points: tuple of points
-
-        **Output:**
-
-        - The center point of given points
-        """
-        x,y,z =(0,0,0)
-        num_points = len(self.points)
-        for point in self.points:
-            x += point.x
-            y += point.y
-            z += point.z
-        return Point(float(x) / num_points,float(y) / num_points,float(z) / num_points)
     
     def area(self):
         """
@@ -256,22 +298,7 @@ class ConvexPolygon(GeoBody):
         else:
             return NotImplementedError("")
     
-    def in_(self,other):
-        """
-        **Input:**
-        
-        - self: ConvexPolygon
-        
-        - other: Plane
 
-        **Output:**
-
-        - whether self in other
-        """
-        if isinstance(other,Plane):
-            return self.plane == other
-        else:
-            raise NotImplementedError("")
 
     def __eq__(self,other):
         if isinstance(other,ConvexPolygon):
@@ -317,12 +344,6 @@ class ConvexPolygon(GeoBody):
         """return the negative ConvexPolygon by reverting the normal"""
         return ConvexPolygon(self.points,reverse=True)
 
-    def length(self):
-        """return the total length of ConvexPolygon""" 
-        length = 0
-        for segment in self.segments():
-            length += segment.length()
-        return length
 
     def move(self,v):
         """Return the ConvexPolygon that you get when you move self by vector v, self is also moved"""
