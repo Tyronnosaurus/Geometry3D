@@ -3,10 +3,12 @@ import math
 import unittest
 from Geometry3D import *
 import Geometry3D
+
 a = origin()
 b = Point(1,0,1)
 c = Point(0,1,1)
 d = Point(1,1,2)
+
 class ConvexPolygonTest(unittest.TestCase):
     def test_polygon_length(self):
         self.assertAlmostEqual(
@@ -82,3 +84,26 @@ class ConvexPolygonTest(unittest.TestCase):
     def test_polygon_Parallelogram(self):
         self.assertTrue(Parallelogram(origin(),Vector(1,0,0),Vector(2,0,1)) == (ConvexPolygon((origin(),Point(3,0,1),Point(1,0,0),Point(2,0,1)))))
         self.assertTrue(Parallelogram(origin(),Vector(1,0,0),Vector(2,0,1)) == (ConvexPolygon((origin(),Point(2,0,1),Point(1,0,0),Point(3,0,1)))))
+
+
+
+
+e = origin()
+f = Point(0,2,2)
+g = Point(2,2,2)
+h = Point(2,0,0)
+i = Point(1,1,1)
+
+class ConcavePolygonTest(unittest.TestCase):
+    def test_polygon_length(self):
+            self.assertAlmostEqual(
+                ConcavePolygon((e,f,g,h,i)).length(), 2*math.sqrt(8)+2+2*math.sqrt(3)
+            )
+
+    def test_polygon_in_plane(self):
+        self.assertTrue(
+            ConcavePolygon((e,f,g,h,i)) in Plane(origin(),Vector(0,1,-1))
+        )
+        self.assertFalse(
+            ConcavePolygon((e,f,g,h,i)) in Plane(origin(),Vector(0,1,0))    #Random plane
+        )
