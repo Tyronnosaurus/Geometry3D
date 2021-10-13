@@ -3,7 +3,7 @@ from .line import Line,x_axis,y_axis,z_axis
 from .plane import Plane,xy_plane,yz_plane,xz_plane
 from .point import Point,origin
 from .segment import Segment
-from .polygon import ConvexPolygon,Parallelogram,get_circle_point_list,Circle
+from .polygon import ConvexPolygon,ConcavePolygon,Parallelogram,get_circle_point_list,Circle
 from .pyramid import Pyramid
 from .polyhedron import ConvexPolyhedron,Parallelepiped,Sphere,Cylinder,Cone
 from .halfline import HalfLine
@@ -14,6 +14,7 @@ __all__ = (
     "Cone",
     "Cylinder",
     "ConvexPolygon",
+    "ConcavePolygon",
     "Parallelogram",
     "Circle",
     "Pyramid",

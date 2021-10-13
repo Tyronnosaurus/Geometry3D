@@ -361,4 +361,35 @@ class ConvexPolygon(Polygon):
 Parallelogram = ConvexPolygon.Parallelogram
 Circle = ConvexPolygon.Circle
 
-__all__ = ("ConvexPolygon","Parallelogram","get_circle_point_list","Circle")
+
+
+
+class ConcavePolygon(Polygon):
+
+    def __init__(self,pts,reverse = False, check_convex=False):
+        """
+        - ConcavePolygons(points)
+        points: a tuple of points.
+
+        The points need to be in order.
+        """
+        points = copy.deepcopy(pts)
+
+        # Convert to list, remove duplicates
+        self.points = sorted(set(points),key=points.index)
+
+        #TODO: Remove redundant points (those which are aligned between previous and next point)
+
+        if len(points) < 3:
+            raise ValueError('Cannot build a polygon with number of points smaller than 3')
+        if reverse:
+            self.plane = -Plane(self.points[0],self.points[1],self.points[2])
+        else:
+            self.plane = Plane(self.points[0],self.points[1],self.points[2])
+    
+        self.center_point = self._get_center_point()
+
+
+
+
+__all__ = ("ConvexPolygon","ConcavePolygon","Parallelogram","get_circle_point_list","Circle")
