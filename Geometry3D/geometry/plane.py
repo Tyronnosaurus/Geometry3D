@@ -6,6 +6,8 @@ from .line import Line
 from ..utils.solver import solve
 from ..utils.vector import Vector,x_unit_vector,y_unit_vector,z_unit_vector
 from ..utils.constant import *
+import copy
+
 class Plane(GeoBody):
     """
     - Plane(Point, Point, Point):
@@ -70,8 +72,12 @@ class Plane(GeoBody):
             self._init_gf(*args)
     
     def _init_pn(self, p, normale):
-        """Initialise a plane given in the point normal form."""
-        self.p = p
+        """Initialise a plane given in the point normal form.
+           Use a copy of the point, not the actual point. Otherwise,
+           if we move() the plane we also drag the point (and any 
+           other object it may belong to)) 
+        """
+        self.p = copy.deepcopy(p)
         self.n = normale.normalized()
 
     def _init_gf(self, a, b, c, d):
