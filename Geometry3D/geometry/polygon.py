@@ -390,6 +390,10 @@ class ConcavePolygon(Polygon):
         self.center_point = self._get_center_point()
 
 
+    def __neg__(self):
+        """return the negative ConvexPolygon by reverting the normal. Usable by adding a minus sign: -MyConcavePolygon"""
+        return ConcavePolygon(self.points,reverse=True)
+
 
 
 __all__ = ("ConvexPolygon","ConcavePolygon","Parallelogram","get_circle_point_list","Circle")
