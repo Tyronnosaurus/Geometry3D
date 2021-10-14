@@ -320,7 +320,7 @@ class ConvexPolygon(Polygon):
     def __hash__(self):
         """return the has of the convexpolygon"""
         return hash(("ConvexPolygon",
-        round(self._get_point_hash_sum(),SIG_FIGURES),
+        round(self._get_point_hash_sum(),SIG_FIGURES), 
         hash(self.plane) + hash(-self.plane),
         hash(self.plane) * hash(-self.plane)
         ))
@@ -388,6 +388,84 @@ class ConcavePolygon(Polygon):
             self.plane = Plane(self.points[0],self.points[1],self.points[2])
     
         self.center_point = self._get_center_point()
+
+    
+    def __eq__(self,other):
+        if isinstance(other,ConcavePolygon):
+            return (hash(self) == hash(other))
+        else:
+            return False
+
+
+    def _get_points_hash(self):
+        #Returns hash of a polygon's ordered list of vertices. We have to keep in mind that:
+        #  abcde != ceabd    Unlike with convexPolygon, vertices don't get automatically ordered. Therefore, order matters.
+        #  abcde == cdeab    Vertices list can start at any of the vertices.
+        #  abcde == edcba    Vertices list can be clockwise or counterclockwise
+        #TODO: Surely this process can be optimized
+
+        standarizedVerts = self._getStandarizedVerticesList()   #Reorder vertices so that different presentations of the same polygon end
+                                                                #up with the same standard presentation (shift & rotate only, no zig-zags)
+        return( hash(tuple(standarizedVerts)) )                 #Lists can't be hashed. Tuples can, and the order of their items matters
+
+
+
+    def _getStandarizedVerticesList(self):
+        #Our startegy will be to reorder the list of vertices in a standarized way that always has the same
+        #starting point and orientation regardless of how it was originally ordered.
+
+        #To choose start vertex, we use a function that always returns the same one no matter how the vertices are ordered
+        i_start = self._pointWithMinXYZ(self.points)
+
+        #Decide orientation (akin to clockwise/counterclowise, but in 3D)
+        #If the start vertex was at position i, here we choose wether to continue advancing towards the vertex i-1 or i+1
+        #Use the same method to select one of the two vertices next to the start vertex.
+        vert_before = self.points[i_start-1] if i_start>0                  else self.points[-1]   #Point to the left of start point (roll over to the end if necessary)
+        vert_after  = self.points[i_start+1] if i_start<len(self.points)-1 else self.points[0]    #Point to the right of start point (roll over to the beginning if necessary)
+        i_second = self._pointWithMinXYZ([vert_before, vert_after])                          #Choose which has lower X (if equal, lower Y, then lower Z)
+        reversed = (i_second == 0)                                                              #If it's the one on the left, we must reverse the order
+
+
+        #Rebuild the vertices list, using list slicing
+        newPointsList = []
+        if(not reversed):
+            #Shift list by slicing in two halves (cutting at the start vertex S). For example:  abcSde --> Sde+abc --> Sdeabc
+            newPointsList.extend( self.points[i_start:] )
+            newPointsList.extend( self.points[:i_start] )
+        else:
+            newPointsList.extend( self.points[0:i_start+1][::-1] )  #Similar method, but we also reverse the sliced cuts with [::-1]
+            newPointsList.extend( self.points[i_start+1:][::-1] )
+        
+
+        return(newPointsList)
+
+
+    def _pointWithMinXYZ(self, pointList):
+        '''Given a list of Points, returns index of point with lowest X.
+           If multiple are found, use the one with lowest Y. Same goes for Z.'''
+        verts = pointList
+        minX = min(v.x for v in verts)              #Find min value of x
+        verts = [v for v in verts if v.x == minX]   #Keep only vertices that have that minX
+        minY = min(v.y for v in verts)              #Idem for minY and minZ
+        verts = [v for v in verts if v.y == minY]
+        minZ = min(v.z for v in verts)
+        verts = [v for v in verts if v.z == minZ]
+        p = verts[0]     #Return the first (and theoretically only) point left after filtering
+
+        for i, v in enumerate(pointList):   #Find index of p in the original list
+            if v.__eq__(p):
+                p_index = i
+
+        return(p_index)
+
+
+    def __hash__(self):
+        """Return the hash of the concavePolygon"""
+        return hash(("ConcavePolygon",
+                     self._get_points_hash(),   #Hashes vertices list (for same polygon, will yield same hash regardless of shifting or orientation of verts list)
+                     hash(self.plane) + hash(-self.plane),
+                     hash(self.plane) * hash(-self.plane)
+        ))
 
 
     def __neg__(self):

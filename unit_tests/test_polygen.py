@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import math
 import unittest
+
+from numpy.polynomial.hermite import poly2herm
 from Geometry3D import *
 import Geometry3D
 
@@ -93,17 +95,60 @@ f = Point(0,2,2)
 g = Point(2,2,2)
 h = Point(2,0,0)
 i = Point(1,1,1)
+poly = ConcavePolygon((e,f,g,h,i))
 
 class ConcavePolygonTest(unittest.TestCase):
+
     def test_polygon_length(self):
-            self.assertAlmostEqual(
-                ConcavePolygon((e,f,g,h,i)).length(), 2*math.sqrt(8)+2+2*math.sqrt(3)
-            )
+        #Compare with lenght of perimeter, calculated manually
+        self.assertAlmostEqual( poly.length() , 2*math.sqrt(8)+2+2*math.sqrt(3) )
 
     def test_polygon_in_plane(self):
-        self.assertTrue(
-            ConcavePolygon((e,f,g,h,i)) in Plane(origin(),Vector(0,1,-1))
-        )
-        self.assertFalse(
-            ConcavePolygon((e,f,g,h,i)) in Plane(origin(),Vector(0,1,0))    #Random plane
-        )
+        self.assertTrue( poly in Plane(origin(),Vector(0,1,-1)) )
+        self.assertFalse( poly in Plane(origin(),Vector(0,1,0)) )    #Random plane
+
+    # def test_polygon_contains_point(self):    #Need to implement __contains__() first
+    #     self.assertTrue(
+    #         origin() in poly
+    #     )
+
+    #     self.assertTrue(
+    #         Point(0.5,0.5,1) in ConvexPolygon((a,b,c,d))
+    #     )
+
+    def test_polygon_eq(self):
+        self.assertEqual( poly , ConcavePolygon((i,h,g,f,e)) )  #Check equality for different presentations of same polygon
+        # self.assertNotEqual(      #Need to implement != method for ConcavePolygon
+        #     poly,
+        #     ConcavePolygon((e,f,g,i,h))
+        # )
+        
+    
+    def test_polygon_eq_without_normal(self):
+        self.assertTrue( poly == ConcavePolygon((h,i,e,f,g)) )  #Check equality when verts are shifted
+        self.assertTrue( poly == -ConcavePolygon((h,i,e,f,g)) ) #Check equality when negating (reversing the normal)
+
+
+    def test_polygon_hash(self):
+        self.assertEqual( poly.__hash__() , poly.__hash__() )  #Must be equal to itself
+
+        self.assertEqual( poly.__hash__() , ConcavePolygon((g,h,i,e,f)).__hash__() ) #Same polygon, but shifted
+
+        self.assertEqual( poly.__hash__() , ConcavePolygon((i,h,g,f,e)).__hash__() ) #Same polygon, but reversed
+
+        #Same polygon, but reversed & shifted. Test all shift possibilities, because _getStandarizedVerticesList() has some tricky list slicing which might have bugs
+        self.assertEqual( poly.__hash__() , ConcavePolygon((f,e,i,h,g)).__hash__() )
+        self.assertEqual( poly.__hash__() , ConcavePolygon((g,f,e,i,h)).__hash__() )
+        self.assertEqual( poly.__hash__() , ConcavePolygon((h,g,f,e,i)).__hash__() )
+        self.assertEqual( poly.__hash__() , ConcavePolygon((i,h,g,f,e)).__hash__() )
+        self.assertEqual( poly.__hash__() , ConcavePolygon((e,i,h,g,f)).__hash__() )
+
+        self.assertNotEqual( poly.__hash__() , ConcavePolygon((e,f,g,i,h)).__hash__() )  #Same vertices but different polygon
+        
+        #Check that equal polygons are identified correctly and discarded in a set
+        s = set()
+        s.add(poly)
+        s.add(ConcavePolygon((i,h,g,f,e)))  #Same polygon, different vertex order
+        self.assertEqual(len(s),1)
+        s.add(ConcavePolygon((e,f,g,i,h)))  #Different polygon, should have a different hash
+        self.assertEqual(len(s),2)
