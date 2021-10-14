@@ -111,6 +111,12 @@ class Polygon(GeoBody):
             raise NotImplementedError("The second parameter for move function must be Vector")
 
 
+    def __neg__(self):
+        """return the negative polygon by reverting the normal. Usable by adding a minus sign: -MyConcavePolygon"""
+        polyClass = type(self) #Use same class (either ConvexPolygon or ConcavePolygon)
+        return polyClass(self.points,reverse=True)
+
+
 
 
 def get_circle_point_list(center,normal,radius,n=10):
@@ -355,10 +361,6 @@ class ConvexPolygon(Polygon):
             hash(self.plane)
             ))
 
-    def __neg__(self):
-        """return the negative ConvexPolygon by reverting the normal"""
-        return ConvexPolygon(self.points,reverse=True)
-
 
 Parallelogram = ConvexPolygon.Parallelogram
 Circle = ConvexPolygon.Circle
@@ -462,10 +464,6 @@ class ConcavePolygon(Polygon):
                      hash(self.plane) * hash(-self.plane)
         ))
 
-
-    def __neg__(self):
-        """return the negative ConvexPolygon by reverting the normal. Usable by adding a minus sign: -MyConcavePolygon"""
-        return ConcavePolygon(self.points,reverse=True)
 
 
 
