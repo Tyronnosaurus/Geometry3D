@@ -89,6 +89,13 @@ class Polygon(GeoBody):
             raise NotImplementedError("")
 
 
+    def __eq__(self,other):
+        if isinstance(other,type(self)):
+            return (hash(self) == hash(other))
+        else:
+            return False
+
+
     def move(self,v):
         """Return the ConvexPolygon that you get when you move self by vector v, self is also moved"""
         if isinstance(v,Vector):
@@ -313,13 +320,6 @@ class ConvexPolygon(Polygon):
         else:
             return NotImplementedError("")
     
-
-
-    def __eq__(self,other):
-        if isinstance(other,ConvexPolygon):
-            return (hash(self) == hash(other))
-        else:
-            return False
     
     
     def _get_point_hash_sum(self):
@@ -390,13 +390,6 @@ class ConcavePolygon(Polygon):
             self.plane = Plane(self.points[0],self.points[1],self.points[2])
     
         self.center_point = self._get_center_point()
-
-    
-    def __eq__(self,other):
-        if isinstance(other,ConcavePolygon):
-            return (hash(self) == hash(other))
-        else:
-            return False
 
 
     def _get_points_hash(self):
