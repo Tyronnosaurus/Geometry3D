@@ -2,7 +2,6 @@
 import math
 import unittest
 
-from numpy.polynomial.hermite import poly2herm
 from Geometry3D import *
 import Geometry3D
 
