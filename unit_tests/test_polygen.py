@@ -152,3 +152,10 @@ class ConcavePolygonTest(unittest.TestCase):
         self.assertEqual(len(s),1)
         s.add(ConcavePolygon((e,f,g,i,h)))  #Different polygon, should have a different hash
         self.assertEqual(len(s),2)
+
+
+    def test_polygon_move(self):
+        v = Vector(1,2,3)
+        cpg0 = poly
+        cpg1 = ConcavePolygon((e.move(v),f.move(v),g.move(v),h.move(v),i.move(v)))
+        self.assertEqual(cpg0.move(v),cpg1)

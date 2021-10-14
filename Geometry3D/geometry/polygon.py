@@ -89,6 +89,21 @@ class Polygon(GeoBody):
             raise NotImplementedError("")
 
 
+    def move(self,v):
+        """Return the ConvexPolygon that you get when you move self by vector v, self is also moved"""
+        if isinstance(v,Vector):
+            point_list = []
+            for point in self.points:
+                point_list.append(point.move(v))
+            self.points = tuple(point_list)
+            self.plane = Plane(self.points[0],self.points[1],self.points[2])
+            self.center_point = self._get_center_point()
+            polyClass = type(self) #Return polygon using same class as original (either ConvexPolygon or ConcavePolygon)
+            return polyClass(self.points)
+        else:
+            raise NotImplementedError("The second parameter for move function must be Vector")
+
+
 
 
 def get_circle_point_list(center,normal,radius,n=10):
@@ -344,19 +359,6 @@ class ConvexPolygon(Polygon):
         """return the negative ConvexPolygon by reverting the normal"""
         return ConvexPolygon(self.points,reverse=True)
 
-
-    def move(self,v):
-        """Return the ConvexPolygon that you get when you move self by vector v, self is also moved"""
-        if isinstance(v,Vector):
-            point_list = []
-            for point in self.points:
-                point_list.append(point.move(v))
-            self.points = tuple(point_list)
-            self.plane = Plane(self.points[0],self.points[1],self.points[2])
-            self.center_point = self._get_center_point()
-            return ConvexPolygon(self.points)
-        else:
-            raise NotImplementedError("The second parameter for move function must be Vector")
 
 Parallelogram = ConvexPolygon.Parallelogram
 Circle = ConvexPolygon.Circle
